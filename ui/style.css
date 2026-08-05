@@ -1,0 +1,166 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  background: transparent;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  color: CanvasText;
+  background: Canvas;
+}
+
+main {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 18px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 20px;
+}
+
+header p,
+.setting-row p {
+  color: color-mix(in srgb, CanvasText 55%, transparent);
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #8e8e93;
+}
+
+.status-dot.ready {
+  background: #30d158;
+}
+
+.status-dot.recording {
+  background: #ff453a;
+  box-shadow: 0 0 0 4px color-mix(in srgb, #ff453a 18%, transparent);
+}
+
+.status-dot.transcribing,
+.status-dot.loading {
+  background: #0a84ff;
+}
+
+.status-dot.error {
+  background: #ff9f0a;
+}
+
+.setting-row,
+.permission-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.setting-row {
+  padding: 12px 0;
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+}
+
+label,
+.permission-row span {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.hotkey {
+  min-width: 104px;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 7px;
+  color: CanvasText;
+  background: color-mix(in srgb, CanvasText 6%, Canvas);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hotkey.recording {
+  border-color: #0a84ff;
+  color: #0a84ff;
+}
+
+.permission-row {
+  min-height: 39px;
+}
+
+.permission-row + .permission-row {
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+}
+
+.link-button {
+  padding: 2px;
+  border: 0;
+  color: #0a84ff;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.link-button.granted {
+  color: #30a14e;
+  cursor: default;
+}
+
+.quiet {
+  color: color-mix(in srgb, CanvasText 58%, transparent);
+}
+
+.error {
+  min-height: 15px;
+  color: #ff453a;
+  font-size: 11px;
+  line-height: 15px;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  color: color-mix(in srgb, CanvasText 45%, transparent);
+  font-size: 11px;
+}
+
+button:focus-visible {
+  outline: 2px solid #0a84ff;
+  outline-offset: 2px;
+}

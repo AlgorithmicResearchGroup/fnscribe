@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "FnScribe",
+  "version": "0.1.0",
+  "identifier": "com.arg.fnscribe",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "settings",
+        "title": "FnScribe",
+        "url": "index.html",
+        "width": 340,
+        "height": 270,
+        "visible": false,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app"],
+    "icon": ["icons/icon.icns", "icons/icon.png"],
+    "resources": ["resources/models/"],
+    "macOS": {
+      "minimumSystemVersion": "13.0",
+      "infoPlist": "Info.plist",
+      "entitlements": "Entitlements.plist"
+    }
+  }
+}

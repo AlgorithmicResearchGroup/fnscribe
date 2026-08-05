@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FnScribe</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div id="status-dot" class="status-dot loading"></div>
+        <div>
+          <h1>FnScribe</h1>
+          <p id="status-text">Loading local model…</p>
+        </div>
+      </header>
+
+      <section class="setting-row">
+        <div>
+          <label>Push to talk</label>
+          <p>Hold, speak, then release</p>
+        </div>
+        <button id="hotkey" class="hotkey" type="button">fn</button>
+      </section>
+
+      <section class="permission-row">
+        <span>Keyboard access</span>
+        <button id="accessibility" class="link-button" type="button">Check permission</button>
+      </section>
+
+      <section class="permission-row">
+        <span>Microphone</span>
+        <button id="microphone" class="link-button" type="button">Check permission</button>
+      </section>
+
+      <p id="error" class="error" role="alert"></p>
+
+      <footer>
+        <span>Everything stays on this Mac.</span>
+        <button id="quit" class="link-button quiet" type="button">Quit</button>
+      </footer>
+    </main>
+    <script src="settings.js"></script>
+  </body>
+</html>
