@@ -33,6 +33,21 @@ Build and locally sign the macOS application bundle:
 ./scripts/build-app.sh
 ```
 
+For distribution, save Apple notarization credentials in Keychain once:
+
+```sh
+xcrun notarytool store-credentials fnscribe-notary \
+  --apple-id "YOUR_APPLE_ID" \
+  --team-id "8432F4M85Y"
+```
+
+The command securely prompts for an app-specific password. Then notarize,
+staple, validate with Gatekeeper, and create the distributable ZIP:
+
+```sh
+./scripts/notarize-app.sh
+```
+
 Then open:
 
 ```text
