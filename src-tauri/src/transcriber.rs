@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, MutexGuard};
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
-pub const MODEL_FILENAME: &str = "ggml-base.en-q5_1.bin";
+pub const MODEL_FILENAME: &str = "ggml-small.en-q5_1.bin";
 const MAX_VOCABULARY_PROMPT_TOKENS: usize = 200;
 const VOCABULARY_PROMPT_TOKENIZATION_CAP: usize = 1_024;
 

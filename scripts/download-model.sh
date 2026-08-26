@@ -4,9 +4,9 @@ set -eu
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 project_dir=$(dirname "$script_dir")
 model_dir="$project_dir/src-tauri/resources/models"
-model_path="$model_dir/ggml-base.en-q5_1.bin"
-model_url="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en-q5_1.bin"
-expected_sha256="4baf70dd0d7c4247ba2b81fafd9c01005ac77c2f9ef064e00dcf195d0e2fdd2f"
+model_path="$model_dir/ggml-small.en-q5_1.bin"
+model_url="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en-q5_1.bin"
+expected_sha256="bfdff4894dcb76bbf647d56263ea2a96645423f1669176f4844a1bf8e478ad30"
 
 mkdir -p "$model_dir"
 
