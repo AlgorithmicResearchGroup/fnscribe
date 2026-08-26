@@ -1,0 +1,181 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+.flowbar {
+  display: flex;
+  width: calc(100% - 8px);
+  height: 58px;
+  margin: 4px;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 10px 9px 13px;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 15px;
+  color: #f5f5f7;
+  background: rgb(29 29 31 / 94%);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 28%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+}
+
+.activity {
+  display: flex;
+  width: 24px;
+  height: 25px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 8px;
+  background: rgb(255 69 58 / 15%);
+}
+
+.activity i {
+  width: 2px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ff6961;
+  animation: listen 780ms ease-in-out infinite alternate;
+}
+
+.activity i:nth-child(2) {
+  height: 13px;
+  animation-delay: -390ms;
+}
+
+.activity i:nth-child(3) {
+  height: 10px;
+  animation-delay: -180ms;
+}
+
+.activity i:nth-child(4) {
+  animation-delay: -520ms;
+}
+
+body[data-phase="starting"] .activity i,
+body[data-phase="transcribing"] .activity i,
+body[data-phase="inserting"] .activity i {
+  height: 4px;
+  background: #64a8ff;
+  animation: process 900ms ease-in-out infinite;
+}
+
+.flowbar-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flowbar-copy strong {
+  font-size: 12px;
+  font-weight: 620;
+  line-height: 15px;
+}
+
+.flowbar-copy span {
+  overflow: hidden;
+  color: rgb(245 245 247 / 60%);
+  font-size: 10px;
+  line-height: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flowbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.stop-button,
+.icon-button {
+  border: 0;
+  color: #f5f5f7;
+  background: rgb(255 255 255 / 10%);
+  cursor: pointer;
+}
+
+.stop-button {
+  min-width: 48px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.icon-button {
+  width: 27px;
+  height: 27px;
+  padding: 0 0 2px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 25px;
+}
+
+.stop-button:hover,
+.icon-button:hover {
+  background: rgb(255 255 255 / 17%);
+}
+
+button:focus-visible {
+  outline: 2px solid #64a8ff;
+  outline-offset: 1px;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@keyframes listen {
+  from {
+    transform: scaleY(0.55);
+  }
+  to {
+    transform: scaleY(1.15);
+  }
+}
+
+@keyframes process {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity i {
+    animation: none;
+  }
+}

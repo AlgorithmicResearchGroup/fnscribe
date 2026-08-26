@@ -1,9 +1,17 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample, SampleFormat, SizedSample, Stream, StreamConfig};
-use std::sync::{Arc, Mutex};
+use serde::Serialize;
+use std::sync::{Arc, Mutex, MutexGuard};
 
 const TARGET_SAMPLE_RATE: u32 = 16_000;
-const MAX_RECORDING_SECONDS: usize = 120;
+pub const MAX_RECORDING_SECONDS: usize = 120;
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct InputDeviceInfo {
+    pub id: String,
+    pub name: String,
+    pub is_default: bool,
+}
 
 pub struct CapturedAudio {
     pub samples: Vec<f32>,
@@ -17,14 +25,43 @@ pub struct AudioRecorder {
     stream_error: Arc<Mutex<Option<String>>>,
     channels: usize,
     sample_rate: u32,
+    microphone: InputDeviceInfo,
+    used_fallback: bool,
 }
 
 impl AudioRecorder {
-    pub fn start() -> Result<Self, String> {
+    pub fn start(preferred_device_id: Option<&str>) -> Result<Self, String> {
         let host = cpal::default_host();
-        let device = host
-            .default_input_device()
+        let default_device = host.default_input_device();
+        let default_id = default_device
+            .as_ref()
+            .and_then(|device| device.id().ok())
+            .map(|id| id.to_string());
+
+        let selected_device = if let Some(preferred_id) = preferred_device_id {
+            host.input_devices()
+                .map_err(|error| format!("Could not list microphones: {error}"))?
+                .find(|device| device.id().is_ok_and(|id| id.to_string() == preferred_id))
+        } else {
+            None
+        };
+        let used_fallback = preferred_device_id.is_some() && selected_device.is_none();
+        let device = selected_device
+            .or(default_device)
             .ok_or_else(|| "No microphone is available.".to_string())?;
+        let device_id = device
+            .id()
+            .map_err(|error| format!("Could not identify the microphone: {error}"))?
+            .to_string();
+        let device_name = device
+            .description()
+            .map(|description| description.name().to_string())
+            .unwrap_or_else(|_| device.to_string());
+        let microphone = InputDeviceInfo {
+            is_default: default_id.as_deref() == Some(device_id.as_str()),
+            id: device_id,
+            name: device_name,
+        };
         let supported_config = device
             .default_input_config()
             .map_err(|error| format!("Could not read the microphone configuration: {error}"))?;
@@ -74,17 +111,27 @@ impl AudioRecorder {
             stream_error,
             channels,
             sample_rate,
+            microphone,
+            used_fallback,
         })
+    }
+
+    pub fn microphone(&self) -> &InputDeviceInfo {
+        &self.microphone
+    }
+
+    pub fn used_fallback(&self) -> bool {
+        self.used_fallback
     }
 
     pub fn finish(self) -> Result<CapturedAudio, String> {
         drop(self.stream);
 
-        if let Some(error) = self.stream_error.lock().unwrap().take() {
+        if let Some(error) = lock(&self.stream_error).take() {
             return Err(error);
         }
 
-        let interleaved = std::mem::take(&mut *self.samples.lock().unwrap());
+        let interleaved = std::mem::take(&mut *lock(&self.samples));
         if interleaved.is_empty() {
             return Err("The microphone did not produce any audio.".to_string());
         }
@@ -100,6 +147,37 @@ impl AudioRecorder {
             rms,
         })
     }
+}
+
+pub fn input_devices() -> Result<Vec<InputDeviceInfo>, String> {
+    let host = cpal::default_host();
+    let default_id = host
+        .default_input_device()
+        .and_then(|device| device.id().ok())
+        .map(|id| id.to_string());
+    let mut devices = host
+        .input_devices()
+        .map_err(|error| format!("Could not list microphones: {error}"))?
+        .filter_map(|device| {
+            let id = device.id().ok()?.to_string();
+            let name = device
+                .description()
+                .map(|description| description.name().to_string())
+                .unwrap_or_else(|_| device.to_string());
+            Some(InputDeviceInfo {
+                is_default: default_id.as_deref() == Some(id.as_str()),
+                id,
+                name,
+            })
+        })
+        .collect::<Vec<_>>();
+    devices.sort_by(|left, right| {
+        right
+            .is_default
+            .cmp(&left.is_default)
+            .then_with(|| left.name.to_lowercase().cmp(&right.name.to_lowercase()))
+    });
+    Ok(devices)
 }
 
 fn build_stream<T>(
@@ -124,7 +202,7 @@ where
                 output.extend(input.iter().take(remaining).copied().map(f32::from_sample));
             },
             move |error| {
-                *stream_error.lock().unwrap() = Some(format!("Microphone error: {error}"));
+                *lock(&stream_error) = Some(format!("Microphone error: {error}"));
             },
             None,
         )
@@ -185,6 +263,12 @@ fn root_mean_square(samples: &[f32]) -> f32 {
     let mean_square =
         samples.iter().map(|sample| sample * sample).sum::<f32>() / samples.len() as f32;
     mean_square.sqrt()
+}
+
+fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+    mutex
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 #[cfg(test)]

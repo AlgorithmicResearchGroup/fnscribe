@@ -5,6 +5,6 @@
   <key>LSUIElement</key>
   <true/>
   <key>NSMicrophoneUsageDescription</key>
-  <string>FnScribe records your voice while you hold the push-to-talk shortcut.</string>
+  <string>FnScribe records your voice during push-to-talk or hands-free dictation.</string>
 </dict>
 </plist>

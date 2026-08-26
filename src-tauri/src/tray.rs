@@ -10,9 +10,11 @@ pub fn update(app: &AppHandle, phase: Phase) {
         let _ = tray.set_icon(Some(icon(phase)));
         let tooltip = match phase {
             Phase::Loading => "FnScribe — loading",
+            Phase::Starting => "FnScribe — starting microphone",
             Phase::Ready => "FnScribe — ready",
             Phase::Recording => "FnScribe — recording",
             Phase::Transcribing => "FnScribe — transcribing",
+            Phase::Inserting => "FnScribe — inserting",
             Phase::Error => "FnScribe — attention needed",
         };
         let _ = tray.set_tooltip(Some(tooltip));
@@ -39,7 +41,7 @@ pub fn icon(phase: Phase) -> Image<'static> {
                 }
             }
         }
-        Phase::Transcribing | Phase::Loading => {
+        Phase::Starting | Phase::Transcribing | Phase::Inserting | Phase::Loading => {
             for center in [4_usize, 9, 14] {
                 for y in 8..11 {
                     for x in center.saturating_sub(1)..=(center + 1).min(ICON_SIZE - 1) {

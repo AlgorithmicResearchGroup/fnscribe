@@ -1,8 +1,12 @@
+use std::ffi::c_void;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Mutex, MutexGuard};
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
 pub const MODEL_FILENAME: &str = "ggml-base.en-q5_1.bin";
+const MAX_VOCABULARY_PROMPT_TOKENS: usize = 200;
+const VOCABULARY_PROMPT_TOKENIZATION_CAP: usize = 1_024;
 
 pub struct Transcriber {
     context: Mutex<Option<WhisperContext>>,
@@ -20,25 +24,30 @@ impl Transcriber {
     pub fn load(&self, path: &Path) -> Result<(), String> {
         let context = WhisperContext::new_with_params(path, WhisperContextParameters::default())
             .map_err(|error| format!("Could not load the local model: {error}"))?;
-        *self.context.lock().unwrap() = Some(context);
-        *self.load_error.lock().unwrap() = None;
+        *lock(&self.context) = Some(context);
+        *lock(&self.load_error) = None;
         Ok(())
     }
 
     pub fn set_load_error(&self, error: String) {
-        *self.load_error.lock().unwrap() = Some(error);
+        *lock(&self.load_error) = Some(error);
     }
 
     pub fn is_ready(&self) -> bool {
-        self.context.lock().unwrap().is_some()
+        lock(&self.context).is_some()
     }
 
     pub fn load_error(&self) -> Option<String> {
-        self.load_error.lock().unwrap().clone()
+        lock(&self.load_error).clone()
     }
 
-    pub fn transcribe(&self, audio: &[f32]) -> Result<String, String> {
-        let context = self.context.lock().unwrap();
+    pub fn transcribe(
+        &self,
+        audio: &[f32],
+        cancel: &AtomicBool,
+        vocabulary_prompt: Option<&str>,
+    ) -> Result<String, String> {
+        let context = lock(&self.context);
         let context = context
             .as_ref()
             .ok_or_else(|| "The local transcription model is not ready.".to_string())?;
@@ -46,6 +55,17 @@ impl Transcriber {
             .create_state()
             .map_err(|error| format!("Could not create a transcription session: {error}"))?;
 
+        let prompt_tokens = vocabulary_prompt.and_then(|prompt| {
+            context
+                .tokenize(prompt, VOCABULARY_PROMPT_TOKENIZATION_CAP)
+                .ok()
+                .map(|mut tokens| {
+                    if tokens.len() > MAX_VOCABULARY_PROMPT_TOKENS {
+                        tokens.drain(..tokens.len() - MAX_VOCABULARY_PROMPT_TOKENS);
+                    }
+                    tokens
+                })
+        });
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
         let threads = std::thread::available_parallelism()
             .map(|count| count.get().min(8) as i32)
@@ -62,6 +82,18 @@ impl Transcriber {
         params.set_print_realtime(false);
         params.set_print_special(false);
         params.set_print_timestamps(false);
+        if let Some(tokens) = prompt_tokens.as_deref() {
+            params.set_tokens(tokens);
+        }
+        // `full` is synchronous, and `cancel` outlives it. whisper.cpp only
+        // reads this AtomicBool through the callback, so the raw pointer stays
+        // valid and is never aliased for mutation.
+        unsafe {
+            params.set_abort_callback(Some(abort_if_cancelled));
+            params.set_abort_callback_user_data(
+                std::ptr::from_ref(cancel).cast_mut().cast::<c_void>(),
+            );
+        }
 
         state
             .full(params, audio)
@@ -73,6 +105,21 @@ impl Transcriber {
             .collect::<String>();
         Ok(clean_transcript(&text))
     }
+}
+
+unsafe extern "C" fn abort_if_cancelled(data: *mut c_void) -> bool {
+    if data.is_null() {
+        return false;
+    }
+    // SAFETY: `data` is installed immediately above from a live `AtomicBool`
+    // and whisper.cpp invokes the callback only during the synchronous call.
+    unsafe { &*data.cast::<AtomicBool>() }.load(Ordering::Acquire)
+}
+
+fn lock<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+    mutex
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 pub fn find_model(resource_dir: Option<&Path>) -> Result<PathBuf, String> {

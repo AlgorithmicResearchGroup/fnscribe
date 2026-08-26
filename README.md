@@ -1,10 +1,10 @@
 # FnScribe
 
-Private, push-to-talk dictation for macOS.
+Private, reliable dictation for macOS.
 
-Hold a shortcut, speak, and release. FnScribe transcribes your voice locally and
-types the result into the app you are using. It lives in the menu bar and stays
-out of the way until you need it.
+Hold a shortcut, speak, and release—or use hands-free mode for longer thoughts.
+FnScribe transcribes your voice locally and inserts the result into the app you
+are using. It lives in the menu bar and stays out of the way until you need it.
 
 ## Download
 
@@ -25,11 +25,36 @@ FnScribe requires an Apple Silicon Mac running macOS 13 Ventura or later.
 The default push-to-talk shortcut is the `fn`/Globe key. To change it, click the
 menu-bar microphone, click the shortcut button, and press a new key combination.
 
+For hands-free dictation, press `fn + Space` once to start and again to stop. You
+can also turn a push-to-talk recording into hands-free mode by pressing Space
+while continuing to hold `fn`. Press `Escape` at any point to cancel without
+inserting text. The compact flowbar shows the active stage and provides Stop and
+Cancel controls. Recordings stop automatically after two minutes.
+
+The settings panel lets you choose a microphone and launch FnScribe at login.
+Smart cleanup is enabled by default. It removes conservative fillers (`um`,
+`uh`, and `erm`) and understands explicit formatting such as `comma`, `period`,
+`question mark`, `new line`, and `new paragraph`. Repeated `number one`,
+`number two` or `bullet` phrases become lists. Say `scratch that` to discard the
+current clause; for short value corrections, say `two, actually three`, or use
+`actually make that` for an explicit replacement.
+
+The personal dictionary supplies local recognition hints and preserves exact
+spelling and capitalization. Each entry has a **Write as** value and an optional
+**Common mishearing** replacement—for example, `FnScribe` and `fn scribe`.
+Dictionary entries are stored only in FnScribe's local settings file, with
+owner-only file permissions, and are never transmitted.
+
+If automatic insertion ever fails, use **Copy Last Transcript** or **Paste Last
+Transcript** from the menu-bar menu. That recovery transcript exists only in
+memory and disappears when FnScribe quits. If smart cleanup changed the last
+dictation, **Original** copies the unmodified transcription for recovery.
+
 The menu-bar icon shows what FnScribe is doing:
 
 - Microphone: ready
 - Square: recording
-- Three dots: transcribing
+- Three dots: starting, transcribing, or inserting
 - Exclamation mark: permission or microphone attention needed
 
 FnScribe currently transcribes English speech.
@@ -39,6 +64,12 @@ FnScribe currently transcribes English speech.
 Speech recognition runs entirely on your Mac using a bundled Whisper model.
 Audio and transcripts are held only in memory: there is no account, cloud
 service, transcription history, or notes database.
+
+For broad compatibility, automatic insertion uses a short-lived, concealed
+clipboard entry and immediately restores the previous clipboard when it has not
+changed in the meantime. The transcript remains available only in memory for
+recovery; choosing **Copy Last Transcript** is the only persistent clipboard
+action.
 
 FnScribe needs:
 
@@ -73,6 +104,11 @@ For development:
 ./scripts/download-model.sh
 cargo tauri dev
 ```
+
+The opt-in delivery regression harness exercises the production insertion path
+against any focused control without adding application-specific runtime logic.
+See [`scripts/DELIVERY_TESTING.md`](scripts/DELIVERY_TESTING.md) for the native,
+terminal, browser, and Electron test matrix.
 
 To use a different whisper.cpp GGML model during development, set
 `FNSCRIBE_MODEL` to its absolute path.

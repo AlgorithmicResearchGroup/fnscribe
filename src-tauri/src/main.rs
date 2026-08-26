@@ -1,24 +1,33 @@
+mod accuracy;
 mod audio;
+#[cfg(feature = "delivery-harness")]
+mod delivery_harness;
+mod dictation;
 mod platform;
+mod runtime_ui;
 mod settings;
 mod state;
 mod transcriber;
 mod tray;
 
-use crate::audio::AudioRecorder;
+use crate::accuracy::DictionaryEntry;
+use crate::audio::{InputDeviceInfo, input_devices};
 use crate::platform::macos;
-use crate::state::{AppState, Phase, Snapshot};
+use crate::state::{AppState, DictationMode, Phase, Snapshot};
 use crate::transcriber::find_model;
 use crate::tray::TRAY_ID;
 use std::thread;
-use std::time::Duration;
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, State, WindowEvent};
+use tauri_plugin_autostart::ManagerExt as AutostartExt;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 use tauri_plugin_positioner::{Position, WindowExt};
 
-const MIN_RECORDING_SECONDS: f32 = 0.30;
-const MIN_AUDIO_RMS: f32 = 0.0015;
+const MENU_OPEN: &str = "open";
+const MENU_PASTE_LAST: &str = "paste-last";
+const MENU_COPY_LAST: &str = "copy-last";
+const MENU_QUIT: &str = "quit";
 
 #[tauri::command]
 fn get_snapshot(state: State<'_, AppState>) -> Snapshot {
@@ -26,29 +35,176 @@ fn get_snapshot(state: State<'_, AppState>) -> Snapshot {
 }
 
 #[tauri::command]
-fn request_keyboard_access() {
+fn get_microphones() -> Result<Vec<InputDeviceInfo>, String> {
+    input_devices()
+}
+
+#[tauri::command]
+fn request_keyboard_access(app: AppHandle) {
     macos::request_accessibility();
+    runtime_ui::publish(&app);
 }
 
 #[tauri::command]
-fn request_microphone() {
+fn request_microphone(app: AppHandle) {
     macos::request_microphone();
+    runtime_ui::publish(&app);
 }
 
 #[tauri::command]
-fn begin_hotkey_capture(state: State<'_, AppState>) {
+fn begin_hotkey_capture(app: AppHandle, state: State<'_, AppState>) {
     state.begin_hotkey_capture();
+    runtime_ui::publish(&app);
 }
 
 #[tauri::command]
-fn cancel_hotkey_capture(state: State<'_, AppState>) {
+fn cancel_hotkey_capture(app: AppHandle, state: State<'_, AppState>) {
     state.cancel_hotkey_capture();
+    runtime_ui::publish(&app);
 }
 
 #[tauri::command]
 fn set_hotkey(app: AppHandle, state: State<'_, AppState>, hotkey: String) -> Result<(), String> {
     state.cancel_hotkey_capture();
     change_hotkey(&app, &state, hotkey)
+}
+
+#[tauri::command]
+fn set_microphone(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    microphone_id: Option<String>,
+) -> Result<(), String> {
+    if let Some(ref selected_id) = microphone_id {
+        let available = input_devices()?;
+        if !available.iter().any(|device| &device.id == selected_id) {
+            return Err("That microphone is no longer available.".to_string());
+        }
+    }
+    state.replace_microphone(microphone_id)?;
+    runtime_ui::set_status(&app, Phase::Ready, "Microphone preference saved");
+    Ok(())
+}
+
+#[tauri::command]
+fn set_launch_at_login(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    let previous = state.launch_at_login();
+    let was_enabled = app
+        .autolaunch()
+        .is_enabled()
+        .map_err(|error| format!("Could not read launch-at-login state: {error}"))?;
+    if enabled != was_enabled {
+        if enabled {
+            app.autolaunch().enable()
+        } else {
+            app.autolaunch().disable()
+        }
+        .map_err(|error| format!("Could not update launch at login: {error}"))?;
+    }
+
+    if enabled != previous
+        && let Err(error) = state.replace_launch_at_login(enabled)
+    {
+        if was_enabled {
+            let _ = app.autolaunch().enable();
+        } else {
+            let _ = app.autolaunch().disable();
+        }
+        return Err(error);
+    }
+    runtime_ui::publish(&app);
+    Ok(())
+}
+
+#[tauri::command]
+fn get_dictionary_entries(state: State<'_, AppState>) -> Vec<DictionaryEntry> {
+    state.dictionary_entries()
+}
+
+#[tauri::command]
+fn save_dictionary_entry(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    original_written_form: Option<String>,
+    written_form: String,
+    spoken_form: Option<String>,
+) -> Result<Vec<DictionaryEntry>, String> {
+    let entries = state.save_dictionary_entry(
+        original_written_form.as_deref(),
+        &written_form,
+        spoken_form.as_deref(),
+    )?;
+    runtime_ui::set_status(&app, Phase::Ready, "Personal dictionary saved");
+    Ok(entries)
+}
+
+#[tauri::command]
+fn delete_dictionary_entry(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    written_form: String,
+) -> Result<Vec<DictionaryEntry>, String> {
+    let entries = state.delete_dictionary_entry(&written_form)?;
+    runtime_ui::set_status(&app, Phase::Ready, "Dictionary entry removed");
+    Ok(entries)
+}
+
+#[tauri::command]
+fn set_smart_cleanup(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    state.replace_smart_cleanup(enabled)?;
+    runtime_ui::set_status(
+        &app,
+        Phase::Ready,
+        if enabled {
+            "Smart cleanup enabled"
+        } else {
+            "Smart cleanup disabled"
+        },
+    );
+    Ok(())
+}
+
+#[tauri::command]
+fn toggle_hands_free(app: AppHandle) {
+    dictation::toggle_hands_free(&app);
+}
+
+#[tauri::command]
+fn stop_dictation(app: AppHandle) {
+    dictation::stop(&app);
+}
+
+#[tauri::command]
+fn cancel_dictation(app: AppHandle) {
+    dictation::cancel(&app);
+}
+
+#[tauri::command]
+fn copy_last_transcript(app: AppHandle) -> Result<(), String> {
+    dictation::copy_last(&app)
+}
+
+#[tauri::command]
+fn copy_original_transcript(app: AppHandle) -> Result<(), String> {
+    dictation::copy_original(&app)
+}
+
+#[tauri::command]
+fn paste_last_transcript(app: AppHandle) -> Result<(), String> {
+    dictation::paste_last(&app)
+}
+
+#[tauri::command]
+fn quit_app(app: AppHandle) {
+    app.exit(0);
 }
 
 fn change_hotkey(app: &AppHandle, state: &AppState, hotkey: String) -> Result<(), String> {
@@ -59,6 +215,17 @@ fn change_hotkey(app: &AppHandle, state: &AppState, hotkey: String) -> Result<()
     };
     let old_hotkey = state.hotkey();
     if hotkey == old_hotkey {
+        if !state.hotkey_registered() {
+            if hotkey != "Fn" {
+                app.global_shortcut()
+                    .register(hotkey.as_str())
+                    .map_err(|error| format!("That shortcut is unavailable: {error}"))?;
+            }
+            state.mark_hotkey_registered(true);
+            runtime_ui::set_status(app, Phase::Ready, "Shortcut restored — ready");
+        } else {
+            runtime_ui::publish(app);
+        }
         return Ok(());
     }
     let old_is_fn = old_hotkey == "Fn";
@@ -84,27 +251,18 @@ fn change_hotkey(app: &AppHandle, state: &AppState, hotkey: String) -> Result<()
         if !new_is_fn {
             let _ = app.global_shortcut().unregister(hotkey.as_str());
         }
-        if !old_is_fn && old_was_registered {
-            let _ = app.global_shortcut().register(old_hotkey.as_str());
-        }
+        let restored = old_is_fn
+            || (old_was_registered && app.global_shortcut().register(old_hotkey.as_str()).is_ok());
+        state.mark_hotkey_registered(restored);
         return Err(error);
     }
     state.mark_hotkey_registered(true);
     if state.transcriber.is_ready() {
-        set_status(app, Phase::Ready, "Ready — hold the shortcut to talk");
+        runtime_ui::set_status(app, Phase::Ready, "Ready — hold the shortcut to talk");
+    } else {
+        runtime_ui::publish(app);
     }
-
     Ok(())
-}
-
-#[tauri::command]
-fn quit_app(app: AppHandle) {
-    app.exit(0);
-}
-
-fn set_status(app: &AppHandle, phase: Phase, message: impl Into<String>) {
-    app.state::<AppState>().set_status(phase, message);
-    tray::update(app, phase);
 }
 
 fn hotkey_event(app: &AppHandle, event_state: ShortcutState) {
@@ -113,154 +271,37 @@ fn hotkey_event(app: &AppHandle, event_state: ShortcutState) {
         return;
     }
     match event_state {
-        ShortcutState::Pressed => begin_recording(app),
-        ShortcutState::Released => finish_recording(app),
+        ShortcutState::Pressed => dictation::begin(app, DictationMode::PushToTalk),
+        ShortcutState::Released => dictation::release_push_to_talk(app),
     }
 }
 
 fn fn_key_event(app: &AppHandle, event: macos::FnEvent) {
     let state = app.state::<AppState>();
     match event {
-        macos::FnEvent::Ready => {
-            state.mark_fn_monitor_ready();
-            if state.hotkey() == "Fn" && state.transcriber.is_ready() {
-                set_status(app, Phase::Ready, "Ready — hold fn to talk");
-            }
+        macos::FnEvent::Ready if state.hotkey() == "Fn" && state.transcriber.is_ready() => {
+            runtime_ui::set_status(app, Phase::Ready, "Ready — hold fn to talk");
         }
         macos::FnEvent::Pressed if state.take_hotkey_capture() => {
             if let Err(error) = change_hotkey(app, &state, "Fn".to_string()) {
-                set_status(app, Phase::Error, error);
+                runtime_ui::set_status(app, Phase::Error, error);
             }
         }
-        macos::FnEvent::Pressed if state.hotkey() == "Fn" => begin_recording(app),
-        macos::FnEvent::Released if state.hotkey() == "Fn" => finish_recording(app),
-        macos::FnEvent::Unavailable if state.hotkey() == "Fn" => set_status(
+        macos::FnEvent::Pressed if state.hotkey() == "Fn" => {
+            dictation::begin(app, DictationMode::PushToTalk);
+        }
+        macos::FnEvent::Released if state.hotkey() == "Fn" => {
+            dictation::release_push_to_talk(app);
+        }
+        macos::FnEvent::HandsFreeToggle => dictation::toggle_hands_free(app),
+        macos::FnEvent::Cancel => dictation::cancel(app),
+        macos::FnEvent::Unavailable if state.hotkey() == "Fn" => runtime_ui::set_status(
             app,
             Phase::Error,
             "Could not listen for fn — re-grant Keyboard access",
         ),
         _ => {}
     }
-}
-
-fn begin_recording(app: &AppHandle) {
-    let state = app.state::<AppState>();
-    let phase = state.status().phase;
-    if matches!(
-        phase,
-        Phase::Loading | Phase::Recording | Phase::Transcribing
-    ) {
-        return;
-    }
-
-    if !state.transcriber.is_ready() {
-        let message = state
-            .transcriber
-            .load_error()
-            .unwrap_or_else(|| "The local transcription model is not ready.".to_string());
-        set_status(app, Phase::Error, message);
-        return;
-    }
-
-    if !macos::accessibility_trusted() {
-        macos::request_accessibility();
-        set_status(
-            app,
-            Phase::Error,
-            "Grant Accessibility permission, then try again.",
-        );
-        return;
-    }
-
-    if !macos::microphone_trusted() {
-        macos::request_microphone();
-        set_status(
-            app,
-            Phase::Error,
-            "Grant Microphone permission, then try again.",
-        );
-        return;
-    }
-
-    if let Some(pid) = macos::frontmost_application_pid()
-        && pid != std::process::id() as i32
-    {
-        state.remember_target_pid(pid);
-    }
-
-    match AudioRecorder::start() {
-        Ok(recorder) => {
-            *state.recorder.lock().unwrap() = Some(recorder);
-            set_status(app, Phase::Recording, "Listening… release to transcribe");
-        }
-        Err(error) => {
-            set_status(app, Phase::Error, error);
-        }
-    }
-}
-
-fn finish_recording(app: &AppHandle) {
-    let state = app.state::<AppState>();
-    if state.status().phase != Phase::Recording {
-        return;
-    }
-    let Some(recorder) = state.recorder.lock().unwrap().take() else {
-        return;
-    };
-    set_status(app, Phase::Transcribing, "Transcribing locally…");
-
-    let app = app.clone();
-    thread::spawn(move || {
-        let captured = match recorder.finish() {
-            Ok(captured) => captured,
-            Err(error) => {
-                set_status(&app, Phase::Error, error);
-                return;
-            }
-        };
-
-        if captured.duration_seconds < MIN_RECORDING_SECONDS {
-            set_status(
-                &app,
-                Phase::Error,
-                "Recording was too short — hold fn while speaking",
-            );
-            return;
-        }
-        if captured.rms < MIN_AUDIO_RMS {
-            set_status(&app, Phase::Error, "No microphone audio detected");
-            return;
-        }
-
-        let transcript = match app
-            .state::<AppState>()
-            .transcriber
-            .transcribe(&captured.samples)
-        {
-            Ok(transcript) => transcript,
-            Err(error) => {
-                set_status(&app, Phase::Error, error);
-                return;
-            }
-        };
-
-        if transcript.is_empty() {
-            set_status(&app, Phase::Ready, "No speech detected");
-            return;
-        }
-
-        if let Some(pid) = app.state::<AppState>().target_pid() {
-            let _ = macos::activate_application(pid);
-        }
-        // Give macOS time to restore the target application's focused field
-        // and finish dispatching the physical shortcut's key-up event.
-        thread::sleep(Duration::from_millis(160));
-        let text = format!("{} ", transcript.trim());
-        match macos::insert_text(&text) {
-            Ok(()) => set_status(&app, Phase::Ready, "Ready — hold the shortcut to talk"),
-            Err(error) => set_status(&app, Phase::Error, error),
-        }
-    });
 }
 
 fn show_or_hide_settings(app: &AppHandle) {
@@ -271,14 +312,30 @@ fn show_or_hide_settings(app: &AppHandle) {
         let _ = window.hide();
         return;
     }
+    remember_frontmost_target(app);
+    let _ = window.move_window_constrained(Position::TrayCenter);
+    let _ = window.show();
+    let _ = window.set_focus();
+    runtime_ui::publish(app);
+}
+
+fn show_settings(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("settings") else {
+        return;
+    };
+    remember_frontmost_target(app);
+    let _ = window.move_window_constrained(Position::TrayCenter);
+    let _ = window.show();
+    let _ = window.set_focus();
+    runtime_ui::publish(app);
+}
+
+fn remember_frontmost_target(app: &AppHandle) {
     if let Some(pid) = macos::frontmost_application_pid()
         && pid != std::process::id() as i32
     {
         app.state::<AppState>().remember_target_pid(pid);
     }
-    let _ = window.move_window_constrained(Position::TrayCenter);
-    let _ = window.show();
-    let _ = window.set_focus();
 }
 
 fn load_model(app: AppHandle) {
@@ -288,20 +345,85 @@ fn load_model(app: AppHandle) {
 
     match result {
         Ok(()) if app.state::<AppState>().hotkey_registered() => {
-            set_status(&app, Phase::Ready, "Ready — hold the shortcut to talk");
+            runtime_ui::set_status(&app, Phase::Ready, "Ready — hold the shortcut to talk");
         }
-        Ok(()) => tray::update(&app, Phase::Error),
+        Ok(()) => runtime_ui::publish(&app),
         Err(error) => {
             app.state::<AppState>()
                 .transcriber
                 .set_load_error(error.clone());
-            set_status(&app, Phase::Error, error);
+            runtime_ui::set_status(&app, Phase::Error, error);
         }
     }
 }
 
+fn build_tray(app: &tauri::App) -> tauri::Result<()> {
+    let open = MenuItem::with_id(app, MENU_OPEN, "Open FnScribe", true, None::<&str>)?;
+    let paste = MenuItem::with_id(
+        app,
+        MENU_PASTE_LAST,
+        "Paste Last Transcript",
+        true,
+        None::<&str>,
+    )?;
+    let copy = MenuItem::with_id(
+        app,
+        MENU_COPY_LAST,
+        "Copy Last Transcript",
+        true,
+        None::<&str>,
+    )?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit = MenuItem::with_id(app, MENU_QUIT, "Quit FnScribe", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&open, &paste, &copy, &separator, &quit])?;
+
+    TrayIconBuilder::with_id(TRAY_ID)
+        .icon(tray::icon(Phase::Loading))
+        .icon_as_template(true)
+        .tooltip("FnScribe — loading")
+        .menu(&menu)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            MENU_OPEN => show_settings(app),
+            MENU_PASTE_LAST => {
+                if let Err(error) = dictation::paste_last(app) {
+                    runtime_ui::set_status(app, Phase::Error, error);
+                }
+            }
+            MENU_COPY_LAST => {
+                if let Err(error) = dictation::copy_last(app) {
+                    runtime_ui::set_status(app, Phase::Error, error);
+                }
+            }
+            MENU_QUIT => app.exit(0),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            tauri_plugin_positioner::on_tray_event(tray.app_handle(), &event);
+            if matches!(
+                event,
+                TrayIconEvent::Click {
+                    button: MouseButton::Left,
+                    button_state: MouseButtonState::Up,
+                    ..
+                }
+            ) {
+                show_or_hide_settings(tray.app_handle());
+            }
+        })
+        .build(app)?;
+    Ok(())
+}
+
 fn main() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(not(feature = "delivery-harness"))]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+        show_settings(app);
+    }));
+
+    builder
+        .plugin(tauri_plugin_autostart::Builder::new().build())
         .plugin(tauri_plugin_positioner::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
@@ -310,11 +432,24 @@ fn main() {
         )
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
+            get_microphones,
             request_keyboard_access,
             request_microphone,
             begin_hotkey_capture,
             cancel_hotkey_capture,
             set_hotkey,
+            set_microphone,
+            set_launch_at_login,
+            get_dictionary_entries,
+            save_dictionary_entry,
+            delete_dictionary_entry,
+            set_smart_cleanup,
+            toggle_hands_free,
+            stop_dictation,
+            cancel_dictation,
+            copy_last_transcript,
+            copy_original_transcript,
+            paste_last_transcript,
             quit_app
         ])
         .setup(|app| {
@@ -327,6 +462,7 @@ fn main() {
                 .map_err(|error| format!("Could not locate the settings directory: {error}"))?;
             let settings_path = settings::path_in(config_dir);
             let saved_settings = settings::load(&settings_path);
+            let launch_at_login = saved_settings.launch_at_login;
             app.manage(AppState::new(settings_path, saved_settings));
             macos::prompt_for_microphone_if_needed();
 
@@ -342,36 +478,36 @@ fn main() {
                 app.state::<AppState>().mark_hotkey_registered(true);
             }
 
+            let dictation_active = app.state::<AppState>().dictation_active_flag();
             let fn_handle = app.handle().clone();
-            macos::start_fn_monitor(move |event| fn_key_event(&fn_handle, event));
+            macos::start_fn_monitor(dictation_active, move |event| {
+                fn_key_event(&fn_handle, event)
+            });
 
-            TrayIconBuilder::with_id(TRAY_ID)
-                .icon(tray::icon(Phase::Loading))
-                .icon_as_template(true)
-                .tooltip("FnScribe — loading")
-                .show_menu_on_left_click(false)
-                .on_tray_icon_event(|tray, event| {
-                    tauri_plugin_positioner::on_tray_event(tray.app_handle(), &event);
-                    if matches!(
-                        event,
-                        TrayIconEvent::Click {
-                            button: MouseButton::Left,
-                            button_state: MouseButtonState::Up,
-                            ..
-                        }
-                    ) {
-                        show_or_hide_settings(tray.app_handle());
-                    }
-                })
-                .build(app)?;
+            if launch_at_login {
+                let _ = app.autolaunch().enable();
+            } else {
+                let _ = app.autolaunch().disable();
+            }
+
+            build_tray(app)?;
+            runtime_ui::publish(app.handle());
 
             let handle = app.handle().clone();
             thread::spawn(move || load_model(handle));
+            #[cfg(feature = "delivery-harness")]
+            delivery_harness::start(app.handle().clone());
             Ok(())
         })
         .on_window_event(|window, event| {
-            if window.label() == "settings" && matches!(event, WindowEvent::Focused(false)) {
-                let _ = window.hide();
+            if window.label() == "settings" {
+                match event {
+                    WindowEvent::Focused(false) => {
+                        let _ = window.hide();
+                    }
+                    WindowEvent::Focused(true) => runtime_ui::publish(window.app_handle()),
+                    _ => {}
+                }
             }
         })
         .run(tauri::generate_context!())

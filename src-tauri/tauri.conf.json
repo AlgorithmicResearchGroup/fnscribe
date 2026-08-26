@@ -8,13 +8,14 @@
   },
   "app": {
     "withGlobalTauri": true,
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "settings",
         "title": "FnScribe",
         "url": "index.html",
-        "width": 340,
-        "height": 270,
+        "width": 390,
+        "height": 590,
         "visible": false,
         "resizable": false,
         "maximizable": false,
@@ -24,6 +25,25 @@
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "shadow": true,
+        "center": true
+      },
+      {
+        "label": "flowbar",
+        "title": "FnScribe dictation",
+        "url": "flowbar.html",
+        "width": 348,
+        "height": 66,
+        "visible": false,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": true,
+        "focus": false,
+        "transparent": true,
         "center": true
       }
     ],

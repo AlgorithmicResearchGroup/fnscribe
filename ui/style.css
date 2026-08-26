@@ -22,7 +22,36 @@ body {
   background: Canvas;
 }
 
-main {
+button,
+select,
+input {
+  font: inherit;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, CanvasText 16%, transparent);
+  border-radius: 7px;
+  color: CanvasText;
+  background: color-mix(in srgb, CanvasText 5%, Canvas);
+  font-size: 12px;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible + span {
+  outline: 2px solid #0a84ff;
+  outline-offset: 2px;
+}
+
+button:disabled,
+select:disabled {
+  cursor: default;
+  opacity: 0.46;
+}
+
+.settings-panel {
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -33,7 +62,11 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
+}
+
+.status-copy {
+  min-width: 0;
 }
 
 h1,
@@ -48,10 +81,18 @@ h1 {
 }
 
 header p,
-.setting-row p {
+.setting-row p,
+.recovery-row p {
+  overflow: hidden;
   color: color-mix(in srgb, CanvasText 55%, transparent);
-  font-size: 12px;
-  line-height: 17px;
+  font-size: 11px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+header p {
+  max-width: 320px;
 }
 
 .status-dot {
@@ -66,12 +107,14 @@ header p,
   background: #30d158;
 }
 
+.status-dot.starting,
 .status-dot.recording {
   background: #ff453a;
   box-shadow: 0 0 0 4px color-mix(in srgb, #ff453a 18%, transparent);
 }
 
 .status-dot.transcribing,
+.status-dot.inserting,
 .status-dot.loading {
   background: #0a84ff;
 }
@@ -80,8 +123,26 @@ header p,
   background: #ff9f0a;
 }
 
+.settings-list,
+.permissions,
+.recovery-row {
+  border: 1px solid color-mix(in srgb, CanvasText 11%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, CanvasText 3%, Canvas);
+}
+
+.settings-list {
+  padding: 0 11px;
+}
+
+.permissions {
+  margin-top: 10px;
+  padding: 0 11px;
+}
+
 .setting-row,
-.permission-row {
+.permission-row,
+.recovery-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -89,27 +150,43 @@ header p,
 }
 
 .setting-row {
-  padding: 12px 0;
-  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  min-height: 55px;
+}
+
+.setting-row + .setting-row,
+.permission-row + .permission-row {
+  border-top: 1px solid color-mix(in srgb, CanvasText 10%, transparent);
+}
+
+.compact-row {
+  min-height: 49px;
+}
+
+.compact-button {
+  min-width: 70px;
 }
 
 label,
-.permission-row span {
-  font-size: 13px;
-  font-weight: 550;
+.permission-row > span,
+.recovery-row > div > span {
+  font-size: 12px;
+  font-weight: 560;
 }
 
-.hotkey {
-  min-width: 104px;
-  padding: 6px 10px;
+.hotkey,
+.secondary-button {
+  min-width: 88px;
+  padding: 6px 9px;
   border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
   border-radius: 7px;
   color: CanvasText;
   background: color-mix(in srgb, CanvasText 6%, Canvas);
-  font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
+}
+
+.hotkey {
+  min-width: 108px;
 }
 
 .hotkey.recording {
@@ -117,12 +194,79 @@ label,
   color: #0a84ff;
 }
 
-.permission-row {
-  min-height: 39px;
+.secondary-button.stop {
+  border-color: color-mix(in srgb, #ff453a 55%, transparent);
+  color: #ff453a;
 }
 
-.permission-row + .permission-row {
-  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+.microphone-row > div {
+  min-width: 0;
+  max-width: 150px;
+}
+
+#microphone-select {
+  width: 188px;
+  min-width: 0;
+  padding: 5px 22px 5px 7px;
+  border: 1px solid color-mix(in srgb, CanvasText 16%, transparent);
+  border-radius: 7px;
+  color: CanvasText;
+  background-color: color-mix(in srgb, CanvasText 5%, Canvas);
+  font-size: 11px;
+  text-overflow: ellipsis;
+}
+
+.switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switch span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, CanvasText 20%, Canvas);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.switch span::after {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+  content: "";
+  transition: transform 120ms ease;
+}
+
+.switch input:checked + span {
+  background: #0a84ff;
+}
+
+.switch input:checked + span::after {
+  transform: translateX(14px);
+}
+
+.switch input:disabled + span {
+  cursor: default;
+  opacity: 0.46;
+}
+
+.permission-row {
+  min-height: 34px;
 }
 
 .link-button {
@@ -130,8 +274,7 @@ label,
   border: 0;
   color: #0a84ff;
   background: transparent;
-  font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
 }
 
@@ -140,15 +283,34 @@ label,
   cursor: default;
 }
 
+.recovery-row {
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 7px 11px;
+}
+
+.recovery-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.destructive {
+  color: #ff453a;
+}
+
 .quiet {
   color: color-mix(in srgb, CanvasText 58%, transparent);
 }
 
 .error {
   min-height: 15px;
+  margin-top: 3px;
+  overflow: hidden;
   color: #ff453a;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 footer {
@@ -157,10 +319,143 @@ footer {
   justify-content: space-between;
   margin-top: auto;
   color: color-mix(in srgb, CanvasText 45%, transparent);
-  font-size: 11px;
+  font-size: 10px;
 }
 
-button:focus-visible {
-  outline: 2px solid #0a84ff;
-  outline-offset: 2px;
+dialog {
+  width: calc(100% - 22px);
+  max-width: 368px;
+  height: calc(100% - 22px);
+  max-height: 574px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, CanvasText 15%, transparent);
+  border-radius: 12px;
+  color: CanvasText;
+  background: Canvas;
+  box-shadow: 0 16px 42px rgb(0 0 0 / 28%);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 22%);
+  backdrop-filter: blur(2px);
+}
+
+.dialog-shell {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.dialog-header {
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.dialog-header > div {
+  min-width: 0;
+}
+
+h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 20px;
+}
+
+.dialog-header p,
+.dictionary-empty {
+  color: color-mix(in srgb, CanvasText 55%, transparent);
+  font-size: 10px;
+  line-height: 15px;
+}
+
+#dictionary-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 8px;
+  padding: 11px;
+  border: 1px solid color-mix(in srgb, CanvasText 11%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, CanvasText 3%, Canvas);
+}
+
+#dictionary-form label {
+  font-size: 10px;
+}
+
+#dictionary-form label span {
+  color: color-mix(in srgb, CanvasText 48%, transparent);
+  font-weight: 400;
+}
+
+.dictionary-form-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 3px;
+}
+
+.dialog-error {
+  min-height: 15px;
+  margin: 3px 1px 0;
+  color: #ff453a;
+  font-size: 10px;
+  line-height: 15px;
+}
+
+.dictionary-list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid color-mix(in srgb, CanvasText 10%, transparent);
+}
+
+.dictionary-empty {
+  padding: 18px 5px;
+  text-align: center;
+}
+
+.dictionary-entry {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 3px;
+}
+
+.dictionary-entry + .dictionary-entry {
+  border-top: 1px solid color-mix(in srgb, CanvasText 9%, transparent);
+}
+
+.dictionary-entry > div:first-child {
+  min-width: 0;
+}
+
+.dictionary-entry strong,
+.dictionary-entry span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dictionary-entry strong {
+  font-size: 11px;
+  font-weight: 580;
+}
+
+.dictionary-entry span {
+  margin-top: 2px;
+  color: color-mix(in srgb, CanvasText 52%, transparent);
+  font-size: 9px;
+}
+
+.dictionary-entry-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
 }

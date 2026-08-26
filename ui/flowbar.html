@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FnScribe dictation</title>
+    <link rel="stylesheet" href="flowbar.css" />
+  </head>
+  <body data-phase="starting">
+    <main class="flowbar" aria-live="polite">
+      <div class="activity" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+      <div class="flowbar-copy">
+        <strong id="phase-label">Starting</strong>
+        <span id="flowbar-message">Starting microphone…</span>
+      </div>
+      <div class="flowbar-actions">
+        <button id="stop" class="stop-button" type="button">Stop</button>
+        <button id="cancel" class="icon-button" type="button" aria-label="Cancel dictation" title="Cancel (Escape)">×</button>
+      </div>
+    </main>
+    <script src="flowbar.js"></script>
+  </body>
+</html>

@@ -7,40 +7,157 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <main>
+    <main class="settings-panel">
       <header>
-        <div id="status-dot" class="status-dot loading"></div>
-        <div>
+        <div id="status-dot" class="status-dot loading" aria-hidden="true"></div>
+        <div class="status-copy">
           <h1>FnScribe</h1>
-          <p id="status-text">Loading local model…</p>
+          <p id="status-text" aria-live="polite">Loading local model…</p>
         </div>
       </header>
 
-      <section class="setting-row">
+      <div class="settings-list">
+        <section class="setting-row">
+          <div>
+            <label for="hotkey">Push to talk</label>
+            <p>Hold, speak, then release</p>
+          </div>
+          <button id="hotkey" class="hotkey" type="button">fn</button>
+        </section>
+
+        <section class="setting-row">
+          <div>
+            <label for="hands-free">Hands-free</label>
+            <p>Press fn + Space to start or stop</p>
+          </div>
+          <button id="hands-free" class="secondary-button" type="button">Start</button>
+        </section>
+
+        <section class="setting-row microphone-row">
+          <div>
+            <label for="microphone-select">Input microphone</label>
+            <p id="microphone-detail">Use the macOS default</p>
+          </div>
+          <select id="microphone-select" aria-label="Input microphone">
+            <option value="">System default</option>
+          </select>
+        </section>
+
+        <section class="setting-row compact-row">
+          <div>
+            <label for="launch-at-login">Launch at login</label>
+            <p>Ready whenever your Mac starts</p>
+          </div>
+          <label class="switch" aria-label="Launch FnScribe at login">
+            <input id="launch-at-login" type="checkbox" />
+            <span aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section class="setting-row compact-row">
+          <div>
+            <label for="smart-cleanup">Smart cleanup</label>
+            <p>Fillers, formatting, lists, and corrections</p>
+          </div>
+          <label class="switch" aria-label="Enable smart transcript cleanup">
+            <input id="smart-cleanup" type="checkbox" />
+            <span aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section class="setting-row compact-row">
+          <div>
+            <label for="open-dictionary">Personal dictionary</label>
+            <p id="dictionary-detail">No saved terms</p>
+          </div>
+          <button id="open-dictionary" class="secondary-button compact-button" type="button">
+            Manage
+          </button>
+        </section>
+      </div>
+
+      <div class="permissions" aria-label="Permissions">
+        <section class="permission-row">
+          <span>Keyboard access</span>
+          <button id="accessibility" class="link-button" type="button">Check permission</button>
+        </section>
+
+        <section class="permission-row">
+          <span>Microphone access</span>
+          <button id="microphone" class="link-button" type="button">Check permission</button>
+        </section>
+      </div>
+
+      <section class="recovery-row" aria-label="Transcript recovery">
         <div>
-          <label>Push to talk</label>
-          <p>Hold, speak, then release</p>
+          <span>Last transcript</span>
+          <p>Memory only; cleared when FnScribe quits</p>
         </div>
-        <button id="hotkey" class="hotkey" type="button">fn</button>
-      </section>
-
-      <section class="permission-row">
-        <span>Keyboard access</span>
-        <button id="accessibility" class="link-button" type="button">Check permission</button>
-      </section>
-
-      <section class="permission-row">
-        <span>Microphone</span>
-        <button id="microphone" class="link-button" type="button">Check permission</button>
+        <div class="recovery-actions">
+          <button
+            id="copy-original"
+            class="link-button"
+            type="button"
+            title="Copy the transcript before smart cleanup"
+            disabled
+          >
+            Original
+          </button>
+          <button id="copy-last" class="link-button" type="button" disabled>Copy</button>
+          <button id="paste-last" class="link-button" type="button" disabled>Paste</button>
+        </div>
       </section>
 
       <p id="error" class="error" role="alert"></p>
 
       <footer>
-        <span>Everything stays on this Mac.</span>
+        <span>Private and fully offline.</span>
         <button id="quit" class="link-button quiet" type="button">Quit</button>
       </footer>
     </main>
+
+    <dialog id="dictionary-dialog" aria-labelledby="dictionary-title">
+      <div class="dialog-shell">
+        <header class="dialog-header">
+          <div>
+            <h2 id="dictionary-title">Personal dictionary</h2>
+            <p>Recognition hints and exact replacements, stored only on this Mac.</p>
+          </div>
+          <button id="close-dictionary" class="link-button quiet" type="button">Done</button>
+        </header>
+
+        <form id="dictionary-form">
+          <label for="dictionary-written">Write as</label>
+          <input
+            id="dictionary-written"
+            type="text"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="FnScribe"
+            required
+          />
+          <label for="dictionary-spoken">Common mishearing <span>(optional)</span></label>
+          <input
+            id="dictionary-spoken"
+            type="text"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="fn scribe"
+          />
+          <div class="dictionary-form-actions">
+            <button id="cancel-dictionary-edit" class="link-button quiet" type="button" hidden>
+              Cancel edit
+            </button>
+            <button id="save-dictionary-entry" class="secondary-button" type="submit">
+              Add term
+            </button>
+          </div>
+        </form>
+
+        <p id="dictionary-error" class="dialog-error" role="alert"></p>
+        <div id="dictionary-list" class="dictionary-list" aria-live="polite"></div>
+      </div>
+    </dialog>
     <script src="settings.js"></script>
   </body>
 </html>
