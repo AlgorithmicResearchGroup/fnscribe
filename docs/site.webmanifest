@@ -1,0 +1,16 @@
+{
+  "name": "FnScribe",
+  "short_name": "FnScribe",
+  "description": "Private, offline dictation for Apple Silicon Macs.",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#090a0a",
+  "theme_color": "#090a0a",
+  "icons": [
+    {
+      "src": "assets/fnscribe-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

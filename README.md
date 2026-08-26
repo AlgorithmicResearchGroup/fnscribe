@@ -2,6 +2,9 @@
 
 Private, reliable dictation for macOS.
 
+[Website](https://algorithmicresearchgroup.github.io/fnscribe/) ·
+[Source](https://github.com/AlgorithmicResearchGroup/fnscribe)
+
 Hold a shortcut, speak, and release—or use hands-free mode for longer thoughts.
 FnScribe transcribes your voice locally and inserts the result into the app you
 are using. It lives in the menu bar and stays out of the way until you need it.

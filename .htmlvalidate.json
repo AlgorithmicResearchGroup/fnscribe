@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "html-validate:recommended",
+    "html-validate:prettier",
+    "html-validate:a11y",
+    "html-validate:document"
+  ],
+  "rules": {
+    "require-sri": "off"
+  }
+}
