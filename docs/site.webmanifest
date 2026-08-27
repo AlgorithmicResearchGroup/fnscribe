@@ -4,8 +4,8 @@
   "description": "Private, offline dictation for Apple Silicon Macs.",
   "start_url": "./",
   "display": "browser",
-  "background_color": "#090a0a",
-  "theme_color": "#090a0a",
+  "background_color": "#fbfaf4",
+  "theme_color": "#fbfaf4",
   "icons": [
     {
       "src": "assets/fnscribe-icon.png",

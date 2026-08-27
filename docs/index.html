@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#080a08" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#fbfaf4" />
     <meta
       name="description"
       content="FnScribe is private, offline dictation for Apple Silicon Macs. Hold fn, speak, and release—your audio and transcript stay on your Mac."
@@ -23,9 +23,9 @@
     />
     <meta
       property="og:image"
-      content="https://algorithmicresearchgroup.github.io/fnscribe/assets/fnscribe-icon.png"
+      content="https://algorithmicresearchgroup.github.io/fnscribe/assets/fnscribe-watercolor.jpg"
     />
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link
       rel="canonical"
       href="https://algorithmicresearchgroup.github.io/fnscribe/"
@@ -39,264 +39,268 @@
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <div class="release-strip" role="note">
-      <span>Early release</span>
-      <p>Built exclusively for Apple Silicon Macs</p>
-      <span aria-hidden="true">↘</span>
-    </div>
-
     <header class="site-header" id="top">
       <a class="brand" href="#top" aria-label="FnScribe home">
-        <img src="assets/fnscribe-icon.png" width="36" height="36" alt="" />
+        <img src="assets/fnscribe-icon.png" width="38" height="38" alt="" />
         <span>FnScribe</span>
       </a>
 
       <nav aria-label="Main navigation">
         <a href="#privacy">Privacy</a>
         <a href="#how-it-works">How it works</a>
-        <a href="#details">Details</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com/AlgorithmicResearchGroup/fnscribe">GitHub</a>
       </nav>
 
       <div class="header-actions">
+        <span class="availability">Mac only · Early release</span>
         <a
-          class="source-link"
-          href="https://github.com/AlgorithmicResearchGroup/fnscribe"
-          >GitHub</a
-        >
-        <a
-          class="download-button download-button-small"
+          class="button button-small"
           href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg"
           aria-label="Download the early release of FnScribe for Apple Silicon Mac"
         >
-          Get FnScribe <span aria-hidden="true">↓</span>
+          Download <span aria-hidden="true">↓</span>
         </a>
       </div>
     </header>
 
     <main id="main-content">
       <section class="hero" aria-labelledby="hero-title">
-        <p class="coordinate-label">On-device speech to text / macOS</p>
-        <h1 id="hero-title">
-          Talk to your Mac.<br />
-          <span>Not the cloud.</span>
-        </h1>
+        <div class="hero-watercolor">
+          <img
+            class="watercolor-art"
+            src="assets/fnscribe-watercolor.jpg"
+            width="1536"
+            height="1024"
+            alt=""
+          />
 
-        <div class="hero-intro">
-          <p>
-            FnScribe turns your voice into text entirely on your computer.
-            Hold <kbd>fn</kbd>, speak naturally, and release to type anywhere.
-          </p>
-          <div>
-            <a
-              class="download-button"
-              href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg"
-            >
-              Download for Mac <span aria-hidden="true">↓</span>
-            </a>
-            <small>macOS 13+ · Apple Silicon · English</small>
+          <div class="hero-copy">
+            <p class="eyebrow"><span aria-hidden="true"></span> Private dictation for Mac</p>
+            <h1 id="hero-title">Speak freely.<br /><em>It stays with you.</em></h1>
+            <p class="hero-lede">
+              FnScribe turns your voice into text entirely on your Mac. No
+              account, no cloud transcription, and no archive of what you said.
+            </p>
+
+            <div class="hero-actions">
+              <a
+                class="button button-primary"
+                href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg"
+              >
+                Download for Mac <span aria-hidden="true">↓</span>
+              </a>
+              <a class="soft-link" href="#privacy">How your privacy works <span aria-hidden="true">→</span></a>
+            </div>
+
+            <p class="hero-compatibility">
+              Early English release · Apple Silicon · macOS 13 or newer
+            </p>
+          </div>
+
+          <div
+            class="dictation-card"
+            role="img"
+            aria-label="FnScribe is listening with the fn key and transcribing locally on this Mac"
+          >
+            <div class="dictation-card-top">
+              <span><i aria-hidden="true"></i> Listening on this Mac</span>
+              <kbd>fn</kbd>
+            </div>
+            <div class="waveform" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
+              ><i></i><i></i><i></i><i></i>
+            </div>
+            <p>Release to place your words at the cursor.</p>
+          </div>
+
+          <div class="local-note">
+            <span aria-hidden="true">✓</span>
+            <p><strong>Processed here.</strong><br />Nothing sent away.</p>
           </div>
         </div>
 
-        <div
-          class="local-console"
-          role="img"
-          aria-label="Voice input is transcribed locally on your Mac and inserted at your cursor without a network connection"
-        >
-          <div class="console-bar">
-            <div class="console-identity">
-              <img src="assets/fnscribe-icon.png" width="28" height="28" alt="" />
-              <span>FNSCRIBE / LOCAL SESSION</span>
-            </div>
-            <span class="offline-indicator">
-              <i aria-hidden="true"></i> Network not required
-            </span>
-          </div>
-
-          <div class="console-flow">
-            <div class="flow-block flow-input">
-              <p class="flow-label">01 / Voice input</p>
-              <div class="waveform" aria-hidden="true">
-                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i
-                ><i></i><i></i><i></i><i></i><i></i>
-              </div>
-              <p class="flow-caption">Listening only while you ask</p>
-            </div>
-
-            <span class="flow-arrow" aria-hidden="true">→</span>
-
-            <div class="flow-block flow-model">
-              <p class="flow-label">02 / Your Mac</p>
-              <div class="chip-mark" aria-hidden="true">
-                <span>LOCAL</span>
-                <b>Whisper</b>
-              </div>
-              <p class="flow-caption">Transcribed on device</p>
-            </div>
-
-            <span class="flow-arrow" aria-hidden="true">→</span>
-
-            <div class="flow-block flow-output">
-              <p class="flow-label">03 / Your cursor</p>
-              <p class="typed-copy">Your words appear right where you left off.<i></i></p>
-              <p class="flow-caption">Inserted into the focused app</p>
-            </div>
-          </div>
-
-          <div class="console-status">
-            <span><b>Audio</b> memory only</span>
-            <span><b>Account</b> none</span>
-            <span><b>Telemetry</b> none</span>
-            <span class="status-ready">Ready for <kbd>fn</kbd></span>
-          </div>
-        </div>
+        <ul class="privacy-ribbon">
+          <li><span aria-hidden="true">01</span> On-device transcription</li>
+          <li><span aria-hidden="true">02</span> No account</li>
+          <li><span aria-hidden="true">03</span> No cloud speech service</li>
+          <li><span aria-hidden="true">04</span> No transcript history</li>
+        </ul>
       </section>
 
       <section class="privacy section" id="privacy" aria-labelledby="privacy-title">
-        <div class="section-marker" aria-hidden="true">01</div>
-        <div class="privacy-statement">
-          <p class="section-kicker">Private by architecture</p>
-          <h2 id="privacy-title">Your words take the shortest possible route.</h2>
-          <p class="section-intro">
-            From your microphone, through a model on your Mac, to the place
-            you are typing. FnScribe has no account system, transcription
-            server, or archive waiting in the middle.
+        <div class="section-heading section-heading-centered">
+          <p class="eyebrow"><span aria-hidden="true"></span> Private by design</p>
+          <h2 id="privacy-title">From your voice to your cursor.<br /><em>Nowhere else.</em></h2>
+          <p>
+            Your words take a simple, local path. FnScribe does not need to
+            know who you are—or send your voice to a server—to help you write.
           </p>
         </div>
 
-        <div class="privacy-ledger">
+        <div
+          class="privacy-journey"
+          role="img"
+          aria-label="Your voice is processed by a local model on your Mac and becomes text at your cursor"
+        >
+          <div class="journey-step journey-voice">
+            <span aria-hidden="true">~</span>
+            <p><strong>Your voice</strong><small>Captured while you hold fn</small></p>
+          </div>
+          <span class="journey-arrow" aria-hidden="true">→</span>
+          <div class="journey-step journey-mac">
+            <img src="assets/fnscribe-icon.png" width="66" height="66" alt="" />
+            <p><strong>Your Mac</strong><small>Whisper runs locally</small></p>
+          </div>
+          <span class="journey-arrow" aria-hidden="true">→</span>
+          <div class="journey-step journey-text">
+            <span aria-hidden="true">I</span>
+            <p><strong>Your words</strong><small>Placed at the cursor</small></p>
+          </div>
+        </div>
+
+        <div class="privacy-details">
           <article>
-            <span>01.1</span>
-            <div>
-              <h3>Recognition stays on your hardware</h3>
-              <p>
-                A bundled Whisper model processes speech locally. Recordings
-                are not sent away for transcription.
-              </p>
-            </div>
-            <strong>LOCAL</strong>
+            <span class="detail-number">01</span>
+            <h3>Speech recognition stays on your hardware.</h3>
+            <p>
+              A bundled Whisper model processes speech directly on your Mac.
+              Your recording is not uploaded for transcription.
+            </p>
           </article>
           <article>
-            <span>01.2</span>
-            <div>
-              <h3>No transcript archive</h3>
-              <p>
-                Audio and recovery text stay in memory. There is no searchable
-                history of what you said.
-              </p>
-            </div>
-            <strong>EPHEMERAL</strong>
+            <span class="detail-number">02</span>
+            <h3>There is no transcript archive.</h3>
+            <p>
+              Audio and recovery text live in memory, not a notes database.
+              Recovery text disappears when FnScribe quits.
+            </p>
           </article>
           <article>
-            <span>01.3</span>
-            <div>
-              <h3>No account or analytics</h3>
-              <p>
-                No login, usage tracker, advertising SDK, or cloud speech
-                service is required.
-              </p>
-            </div>
-            <strong>QUIET</strong>
+            <span class="detail-number">03</span>
+            <h3>No identity. No analytics.</h3>
+            <p>
+              There is no sign-in, advertising SDK, cloud speech service, or
+              usage tracker quietly watching in the background.
+            </p>
           </article>
           <article>
-            <span>01.4</span>
-            <div>
-              <h3>Your clipboard comes back</h3>
-              <p>
-                FnScribe briefly uses a concealed clipboard entry for broad
-                compatibility, then restores your previous contents when safe.
-              </p>
-            </div>
-            <strong>RESTORED</strong>
+            <span class="detail-number">04</span>
+            <h3>Your clipboard comes back.</h3>
+            <p>
+              For broad compatibility, FnScribe briefly uses a concealed
+              clipboard entry and restores your prior contents when safe.
+            </p>
           </article>
         </div>
       </section>
 
-      <section class="gesture section" id="how-it-works" aria-labelledby="gesture-title">
-        <div class="gesture-heading">
-          <div class="section-marker" aria-hidden="true">02</div>
-          <div>
-            <p class="section-kicker">One key, three moments</p>
-            <h2 id="gesture-title">Dictation without breaking your train of thought.</h2>
-          </div>
-        </div>
-
-        <div class="gesture-stage">
-          <div class="key-display" aria-hidden="true">
-            <span>Hold</span>
+      <section class="how section" id="how-it-works" aria-labelledby="how-title">
+        <div class="how-panel">
+          <div class="key-illustration" aria-hidden="true">
+            <span>Just hold</span>
             <kbd>fn</kbd>
+            <i></i>
           </div>
-          <ol>
-            <li>
-              <span>01</span>
-              <div>
-                <h3>Place your cursor</h3>
-                <p>Start in any text field where you want the words to go.</p>
-              </div>
-            </li>
-            <li>
-              <span>02</span>
-              <div>
-                <h3>Hold and speak</h3>
-                <p>Keep holding <kbd>fn</kbd>, or use <kbd>fn</kbd> + Space for hands-free mode.</p>
-              </div>
-            </li>
-            <li>
-              <span>03</span>
-              <div>
-                <h3>Release to write</h3>
-                <p>Your speech is cleaned up locally and inserted at the cursor.</p>
-              </div>
-            </li>
-          </ol>
+
+          <div class="how-copy">
+            <p class="eyebrow"><span aria-hidden="true"></span> One gentle shortcut</p>
+            <h2 id="how-title">Keep your hands—and your thoughts—moving.</h2>
+            <ol>
+              <li>
+                <span>1</span>
+                <div>
+                  <h3>Place your cursor</h3>
+                  <p>Start in the text field where your words should appear.</p>
+                </div>
+              </li>
+              <li>
+                <span>2</span>
+                <div>
+                  <h3>Hold <kbd>fn</kbd> and speak</h3>
+                  <p>Or press <kbd>fn</kbd> + Space when you want hands-free dictation.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
+                <div>
+                  <h3>Release to write</h3>
+                  <p>FnScribe transcribes locally and inserts the result at your cursor.</p>
+                </div>
+              </li>
+            </ol>
+          </div>
         </div>
       </section>
 
-      <section class="details section" id="details" aria-labelledby="details-title">
-        <div class="details-heading">
-          <div class="section-marker" aria-hidden="true">03</div>
-          <div>
-            <p class="section-kicker">Small utility, useful details</p>
-            <h2 id="details-title">Built to disappear into your workflow.</h2>
-          </div>
+      <section class="features section" id="features" aria-labelledby="features-title">
+        <div class="section-heading">
+          <p class="eyebrow"><span aria-hidden="true"></span> Quietly useful</p>
+          <h2 id="features-title">The small details that make dictation feel natural.</h2>
         </div>
 
-        <div class="detail-table">
-          <article>
-            <span class="detail-code">ANY/APP</span>
-            <h3>Write across macOS</h3>
-            <p>Use the same shortcut in native apps, browsers, terminals, and other text fields.</p>
+        <div class="feature-grid">
+          <article class="feature-sage">
+            <span aria-hidden="true">Aa</span>
+            <h3>Write across your Mac</h3>
+            <p>
+              Use one familiar shortcut in native apps, browsers, terminals,
+              and other text fields.
+            </p>
           </article>
-          <article>
-            <span class="detail-code">CLEAN/TEXT</span>
-            <h3>Useful local cleanup</h3>
-            <p>Spoken punctuation, lists, conservative filler removal, and explicit corrections.</p>
+          <article class="feature-blue">
+            <span aria-hidden="true">✦</span>
+            <h3>Thoughtful text cleanup</h3>
+            <p>
+              Spoken punctuation, lists, conservative filler removal, and
+              explicit corrections—all handled locally.
+            </p>
           </article>
-          <article>
-            <span class="detail-code">YOUR/WORDS</span>
-            <h3>Personal dictionary</h3>
-            <p>Teach FnScribe names and exact capitalization. Entries remain in local settings.</p>
+          <article class="feature-butter">
+            <span aria-hidden="true">ab</span>
+            <h3>Your personal dictionary</h3>
+            <p>
+              Teach FnScribe names and exact capitalization. Every entry stays
+              in your local settings.
+            </p>
           </article>
-          <article>
-            <span class="detail-code">SAFE/FALLBACK</span>
-            <h3>Recovery when needed</h3>
-            <p>Copy or retry the last in-memory transcript if automatic insertion misses.</p>
+          <article class="feature-peach">
+            <span aria-hidden="true">↺</span>
+            <h3>A calm recovery path</h3>
+            <p>
+              Copy or retry the latest in-memory transcript if automatic
+              insertion ever misses.
+            </p>
           </article>
         </div>
       </section>
 
       <section class="release-panel" id="requirements" aria-labelledby="release-title">
-        <div class="release-panel-copy">
-          <p class="section-kicker">Mac only · early release</p>
-          <h2 id="release-title">Try it on your Mac.</h2>
+        <div class="release-copy">
+          <p class="eyebrow"><span aria-hidden="true"></span> Early release · Mac only</p>
+          <h2 id="release-title">A quieter way to write is ready to try.</h2>
           <p>
-            FnScribe is an early English-language release for Apple Silicon.
-            Expect active iteration and the occasional rough edge.
+            FnScribe is currently an early English-language release for Apple
+            Silicon Macs. Expect active iteration and the occasional rough edge.
           </p>
+          <div class="release-actions">
+            <a
+              class="button button-primary"
+              href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg"
+            >
+              Download FnScribe <span aria-hidden="true">↓</span>
+            </a>
+            <a
+              class="soft-link"
+              href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases"
+              >Read the release notes <span aria-hidden="true">→</span></a
+            >
+          </div>
         </div>
 
         <dl class="requirements">
           <div>
-            <dt>Platform</dt>
+            <dt>Made for</dt>
             <dd>macOS only</dd>
           </div>
           <div>
@@ -312,25 +316,12 @@
             <dd>Microphone + Accessibility</dd>
           </div>
         </dl>
-
-        <div class="release-panel-actions">
-          <a
-            class="download-button download-button-inverse"
-            href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg"
-          >
-            Download FnScribe <span aria-hidden="true">↓</span>
-          </a>
-          <a
-            href="https://github.com/AlgorithmicResearchGroup/fnscribe/releases"
-            >Read the release notes ↗</a
-          >
-        </div>
       </section>
     </main>
 
     <footer>
       <a class="brand" href="#top" aria-label="Back to the top">
-        <img src="assets/fnscribe-icon.png" width="32" height="32" alt="" />
+        <img src="assets/fnscribe-icon.png" width="34" height="34" alt="" />
         <span>FnScribe</span>
       </a>
       <p>Private dictation for Mac. No cookies, analytics, or tracking pixels.</p>
