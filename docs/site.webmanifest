@@ -8,7 +8,7 @@
   "theme_color": "#fbfaf4",
   "icons": [
     {
-      "src": "assets/fnscribe-icon.png",
+      "src": "assets/fnscribe-icon.png?v=2",
       "sizes": "512x512",
       "type": "image/png"
     }
