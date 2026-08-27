@@ -55,7 +55,13 @@
     "active": true,
     "targets": ["app"],
     "icon": ["icons/icon.icns", "icons/icon.png"],
-    "resources": ["resources/models/ggml-small.en-q5_1.bin"],
+    "copyright": "Copyright © 2026 Algorithmic Research Group, Inc.",
+    "license": "GPL-3.0-only",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "LICENSE",
+      "resources/models/ggml-small.en-q5_1.bin": "resources/models/ggml-small.en-q5_1.bin"
+    },
     "macOS": {
       "minimumSystemVersion": "13.0",
       "infoPlist": "Info.plist",

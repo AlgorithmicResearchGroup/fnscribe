@@ -1,7 +1,7 @@
 {
   "name": "FnScribe",
   "short_name": "FnScribe",
-  "description": "Private, offline dictation for Apple Silicon Macs.",
+  "description": "Private, offline dictation for Mac.",
   "start_url": "./",
   "display": "browser",
   "background_color": "#fbfaf4",

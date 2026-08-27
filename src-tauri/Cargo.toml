@@ -3,6 +3,7 @@ name = "fnscribe"
 version = "0.1.0"
 description = "A minimal local macOS push-to-talk dictation utility"
 authors = ["arg"]
+license = "GPL-3.0-only"
 edition = "2024"
 rust-version = "1.85"
 

@@ -11,9 +11,11 @@ are using. It lives in the menu bar and stays out of the way until you need it.
 
 ## Download
 
-[Download FnScribe for Apple Silicon](https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg)
+[Download for Apple Silicon](https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-arm64.dmg) ·
+[Download for Intel Mac](https://github.com/AlgorithmicResearchGroup/fnscribe/releases/latest/download/FnScribe-x64.dmg)
 
-FnScribe requires an Apple Silicon Mac running macOS 13 Ventura or later.
+FnScribe requires an Apple Silicon or 64-bit Intel Mac running macOS 13 Ventura
+or later.
 
 1. Open the downloaded DMG and drag **FnScribe** to **Applications**.
 2. Open FnScribe from your Applications folder. It appears in the menu bar, not
@@ -95,11 +97,14 @@ Building requires Rust 1.85 or newer, CMake, Clang, and the Tauri CLI:
 
 ```sh
 cargo install tauri-cli --version '^2' --locked
-./scripts/build-app.sh
+./scripts/build-app.sh         # Native Mac architecture
+./scripts/build-app.sh x64     # Intel Mac
 ```
 
-The app bundle is written to
-`target/release/bundle/macos/FnScribe.app`.
+Architecture-specific app bundles are written beneath
+`target/<rust-target>/release/bundle/macos/FnScribe.app`. To notarize and create
+an Intel installer, run `./scripts/notarize-app.sh x64`; the resulting file is
+`target/release/bundle/dmg/FnScribe-x64.dmg`.
 
 For development:
 
@@ -115,3 +120,9 @@ terminal, browser, and Electron test matrix.
 
 To use a different whisper.cpp GGML model during development, set
 `FNSCRIBE_MODEL` to its absolute path.
+
+## License
+
+FnScribe is free software licensed under the
+[GNU General Public License version 3](LICENSE). Copyright © 2026 Algorithmic
+Research Group, Inc.
