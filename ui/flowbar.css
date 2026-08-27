@@ -1,5 +1,12 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+  --ink: #27342b;
+  --muted: #748076;
+  --sage: #789579;
+  --sage-soft: #dfead3;
+  --aqua: #dceeed;
+  --lime-soft: #eff7d5;
+  --paper: rgb(255 253 248 / 94%);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   font-synthesis: none;
 }
@@ -29,13 +36,13 @@ button {
   align-items: center;
   gap: 11px;
   padding: 9px 10px 9px 13px;
-  border: 1px solid rgb(255 255 255 / 13%);
+  border: 1px solid rgb(78 101 82 / 15%);
   border-radius: 15px;
-  color: #f5f5f7;
-  background: rgb(29 29 31 / 94%);
-  box-shadow: 0 8px 30px rgb(0 0 0 / 28%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  backdrop-filter: blur(20px) saturate(150%);
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 10px 32px rgb(52 75 58 / 16%);
+  -webkit-backdrop-filter: blur(20px) saturate(115%);
+  backdrop-filter: blur(20px) saturate(115%);
 }
 
 .activity {
@@ -47,24 +54,27 @@ button {
   justify-content: center;
   gap: 2px;
   border-radius: 8px;
-  background: rgb(255 69 58 / 15%);
+  background: var(--lime-soft);
+  box-shadow: inset 0 0 0 1px rgb(89 116 90 / 7%);
 }
 
 .activity i {
   width: 2px;
   height: 7px;
   border-radius: 999px;
-  background: #ff6961;
+  background: var(--sage);
   animation: listen 780ms ease-in-out infinite alternate;
 }
 
 .activity i:nth-child(2) {
   height: 13px;
+  background: #91aa72;
   animation-delay: -390ms;
 }
 
 .activity i:nth-child(3) {
   height: 10px;
+  background: #6f988c;
   animation-delay: -180ms;
 }
 
@@ -76,8 +86,14 @@ body[data-phase="starting"] .activity i,
 body[data-phase="transcribing"] .activity i,
 body[data-phase="inserting"] .activity i {
   height: 4px;
-  background: #64a8ff;
+  background: #76a39d;
   animation: process 900ms ease-in-out infinite;
+}
+
+body[data-phase="starting"] .activity,
+body[data-phase="transcribing"] .activity,
+body[data-phase="inserting"] .activity {
+  background: var(--aqua);
 }
 
 .flowbar-copy {
@@ -96,7 +112,7 @@ body[data-phase="inserting"] .activity i {
 
 .flowbar-copy span {
   overflow: hidden;
-  color: rgb(245 245 247 / 60%);
+  color: var(--muted);
   font-size: 10px;
   line-height: 13px;
   text-overflow: ellipsis;
@@ -113,8 +129,8 @@ body[data-phase="inserting"] .activity i {
 .stop-button,
 .icon-button {
   border: 0;
-  color: #f5f5f7;
-  background: rgb(255 255 255 / 10%);
+  color: var(--ink);
+  background: rgb(120 149 121 / 12%);
   cursor: pointer;
 }
 
@@ -136,11 +152,11 @@ body[data-phase="inserting"] .activity i {
 
 .stop-button:hover,
 .icon-button:hover {
-  background: rgb(255 255 255 / 17%);
+  background: var(--sage-soft);
 }
 
 button:focus-visible {
-  outline: 2px solid #64a8ff;
+  outline: 2px solid #8dae47;
   outline-offset: 1px;
 }
 
