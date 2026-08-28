@@ -17,20 +17,21 @@ pub fn publish(app: &AppHandle) {
     tray::update(app, phase);
 
     let snapshot = state.snapshot(macos::accessibility_trusted(), macos::microphone_trusted());
-    let _ = app.emit(SNAPSHOT_EVENT, snapshot);
-
-    let Some(window) = app.get_webview_window("flowbar") else {
-        return;
-    };
-    if matches!(
-        phase,
-        Phase::Starting | Phase::Recording | Phase::Transcribing | Phase::Inserting
-    ) {
-        if !window.is_visible().unwrap_or(false) {
-            let _ = window.move_window(Position::BottomCenter);
-            let _ = window.show();
+    if let Some(window) = app.get_webview_window("flowbar") {
+        if matches!(
+            phase,
+            Phase::Starting | Phase::Recording | Phase::Transcribing | Phase::Inserting
+        ) {
+            if !window.is_visible().unwrap_or(false) {
+                let _ = window.move_window(Position::BottomCenter);
+                let _ = window.show();
+            }
+        } else {
+            let _ = window.hide();
         }
-    } else {
-        let _ = window.hide();
     }
+
+    // Hidden webviews can miss or defer events. Publish only after the flowbar
+    // is visible so its first painted state cannot be the startup placeholder.
+    let _ = app.emit(SNAPSHOT_EVENT, snapshot);
 }

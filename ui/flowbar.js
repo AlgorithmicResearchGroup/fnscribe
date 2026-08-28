@@ -5,6 +5,7 @@ const phaseLabel = document.querySelector("#phase-label");
 const message = document.querySelector("#flowbar-message");
 const stopButton = document.querySelector("#stop");
 const cancelButton = document.querySelector("#cancel");
+let snapshotVersion = 0;
 
 const labels = {
   starting: "Starting",
@@ -25,6 +26,12 @@ function render(snapshot) {
   cancelButton.disabled = false;
 }
 
+async function refresh() {
+  const version = snapshotVersion;
+  const snapshot = await invoke("get_snapshot");
+  if (version === snapshotVersion) render(snapshot);
+}
+
 async function act(command, button) {
   button.disabled = true;
   try {
@@ -37,5 +44,16 @@ async function act(command, button) {
 stopButton.addEventListener("click", () => act("stop_dictation", stopButton));
 cancelButton.addEventListener("click", () => act("cancel_dictation", cancelButton));
 
-listen("snapshot-changed", ({ payload }) => render(payload));
-invoke("get_snapshot").then(render);
+async function initialize() {
+  await listen("snapshot-changed", ({ payload }) => {
+    snapshotVersion += 1;
+    render(payload);
+  });
+  await refresh();
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refresh();
+});
+
+initialize();

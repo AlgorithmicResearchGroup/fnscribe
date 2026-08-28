@@ -33,6 +33,7 @@ let currentHotkey = "Fn";
 let hotkeyAtCapture = null;
 let selectedMicrophoneId = null;
 let editingWrittenForm = null;
+let snapshotVersion = 0;
 
 const keyNames = {
   Space: "Space",
@@ -248,8 +249,10 @@ function render(snapshot) {
 }
 
 async function refresh() {
+  const version = snapshotVersion;
   try {
-    render(await invoke("get_snapshot"));
+    const snapshot = await invoke("get_snapshot");
+    if (version === snapshotVersion) render(snapshot);
   } catch (error) {
     errorText.textContent = cleanError(error);
   }
@@ -490,10 +493,18 @@ pasteLastButton.addEventListener("click", async () => {
 
 quitButton.addEventListener("click", () => invoke("quit_app"));
 
-listen("snapshot-changed", ({ payload }) => render(payload));
 window.addEventListener("focus", async () => {
   await refresh();
   await loadMicrophones();
 });
 
-refresh().then(loadMicrophones);
+async function initialize() {
+  await listen("snapshot-changed", ({ payload }) => {
+    snapshotVersion += 1;
+    render(payload);
+  });
+  await refresh();
+  await loadMicrophones();
+}
+
+initialize();
